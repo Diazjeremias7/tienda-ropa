@@ -1,5 +1,15 @@
 # 🛍️ Tienda de Ropa - Sistema de Gestión
 
+## 👥 Integrantes del Proyecto
+
+- **Jessica Pellegrini**
+- **Jeremias Diaz**
+- **Pedro Crowley**
+- **Dario Colantonio**
+
+
+
+
 Sistema completo de gestión para tienda de ropa con frontend React, backend Node.js/Express y base de datos MySQL.
 
 ## 📋 Características
@@ -267,15 +277,4 @@ docker-compose restart mysql
 - `GET /api/ventas` - Listar ventas
 - `POST /api/ventas` - Crear venta
 - `GET /api/ventas/:id` - Detalle de venta
-
-## 📄 Licencia
-
-MIT
-
-## 👥 Integrantes del Proyecto
-
-- **Jessica Pellegrini**
-- **Jeremias Diaz**
-- **Pedro Crowley**
-- **Dario Colantonio**
 
