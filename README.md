@@ -66,49 +66,7 @@ docker-compose down -v
 docker-compose up -d --build
 ```
 
-## 💻 Instalación Manual (Sin Docker)
 
-### Prerrequisitos
-- Node.js 16 o superior
-- MySQL 8.0
-- npm o yarn
-
-### Backend
-
-1. **Instalar dependencias**
-```bash
-cd backend
-npm install
-```
-
-2. **Configurar variables de entorno**
-```bash
-cp .env.example .env
-# Editar .env con tus credenciales de MySQL
-```
-
-3. **Crear base de datos**
-```bash
-mysql -u root -p < ../database/schema.sql
-```
-
-4. **Iniciar servidor**
-```bash
-npm run dev
-```
-
-### Frontend
-
-1. **Instalar dependencias**
-```bash
-cd frontend
-npm install
-```
-
-2. **Iniciar aplicación**
-```bash
-npm start
-```
 
 ## 🔑 Credenciales por defecto
 
