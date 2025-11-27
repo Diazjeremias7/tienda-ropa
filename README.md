@@ -66,7 +66,21 @@ docker-compose down -v
 docker-compose up -d --build
 ```
 
+### Script de utilidades
 
+Puedes usar el script `docker.sh` para gestionar los contenedores más fácilmente:
+
+```bash
+./docker.sh start    # Iniciar contenedores
+./docker.sh stop     # Detener contenedores
+./docker.sh restart  # Reiniciar contenedores
+./docker.sh logs     # Ver logs (opcional: especificar servicio)
+./docker.sh status   # Ver estado de contenedores
+./docker.sh build    # Reconstruir imágenes
+./docker.sh clean    # Limpiar todo (incluye BD)
+./docker.sh db       # Conectar a MySQL
+./docker.sh test     # Probar la API
+```
 
 ## 🔑 Credenciales por defecto
 
@@ -258,15 +272,10 @@ docker-compose restart mysql
 
 MIT
 
-## 👥 Contribuir
+## 👥 Integrantes del Proyecto
 
-Las contribuciones son bienvenidas. Por favor:
-1. Fork el proyecto
-2. Crea una rama para tu feature (`git checkout -b feature/nueva-funcionalidad`)
-3. Commit tus cambios (`git commit -m 'Agrega nueva funcionalidad'`)
-4. Push a la rama (`git push origin feature/nueva-funcionalidad`)
-5. Abre un Pull Request
+- **Jessica Pellegrini**
+- **Jeremias Diaz**
+- **Pedro Crowley**
+- **Dario Colantonio**
 
-## 📧 Contacto
-
-Para preguntas o soporte, por favor abre un issue en el repositorio.
