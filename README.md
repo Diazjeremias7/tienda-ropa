@@ -99,8 +99,9 @@ Puedes usar el script `docker.sh` para gestionar los contenedores más fácilmen
 - Password: `admin123`
 
 **Usuario Vendedor:**
-- Email: `juan@tienda.com`
-- Password: `admin123`
+- Email: `jere@hotmail.com`
+- Password: `1234`
+
 
 ## 📦 Scripts disponibles
 
