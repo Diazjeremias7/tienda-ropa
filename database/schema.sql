@@ -49,12 +49,12 @@ CREATE TABLE detalle_venta (
 -- Email: admin@tienda.com
 -- Password: admin123
 INSERT INTO usuario (nombre, email, password, rol) 
-VALUES ('Administrador', 'admin@tienda.com', '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin');
+VALUES ('Administrador', 'admin@tienda.com', '$2b$10$xMVI1QRSnks48vpC2kBKTu0wC73uO2JO8f1pF8./qZB2qYFkQap7K', 'admin');
 
 -- Usuarios vendedores
 INSERT INTO usuario (nombre, email, password, rol) VALUES
-('Juan Perez', 'juan@tienda.com', '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'vendedor'),
-('Maria Gonzalez', 'maria@tienda.com', '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'vendedor');
+('Juan Perez', 'juan@tienda.com', '$2b$10$xMVI1QRSnks48vpC2kBKTu0wC73uO2JO8f1pF8./qZB2qYFkQap7K', 'vendedor'),
+('Maria Gonzalez', 'maria@tienda.com', '$2b$10$xMVI1QRSnks48vpC2kBKTu0wC73uO2JO8f1pF8./qZB2qYFkQap7K', 'vendedor');
 
 -- Productos de ejemplo
 INSERT INTO producto (nombre, descripcion, precio, stock, categoria, color) VALUES
