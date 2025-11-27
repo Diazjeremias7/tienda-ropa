@@ -4,14 +4,13 @@ const bcrypt = require('bcrypt');
 class Usuario {
   static async crear(datos) {
     const { nombre, email, password, rol = 'vendedor' } = datos;
-    const hashedPassword = await bcrypt.hash(password, 10);
     
     const [result] = await db.query(
       'INSERT INTO usuario (nombre, email, password, rol) VALUES (?, ?, ?, ?)',
-      [nombre, email, hashedPassword, rol]
+      [nombre, email, password, rol]
     );
     
-    return result.insertId;
+    return { id: result.insertId };
   }
 
   static async obtenerTodos() {
