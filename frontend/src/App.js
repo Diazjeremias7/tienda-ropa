@@ -11,6 +11,7 @@ import Ventas from './pages/Ventas';
 import VentaDetalle from './pages/VentaDetalle';
 import Usuarios from './pages/Usuarios';
 import NuevaVenta from './pages/NuevaVenta';
+import Reportes from './pages/Reportes';
 import './App.css';
 
 // Componente para proteger rutas
@@ -55,6 +56,7 @@ function App() {
             <Route path="ventas" element={<Ventas />} />
             <Route path="ventas/nueva" element={<NuevaVenta />} />
             <Route path="ventas/:id" element={<VentaDetalle />} />
+            <Route path="reportes" element={<Reportes />} />
             <Route
               path="usuarios"
               element={

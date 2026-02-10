@@ -100,4 +100,71 @@ export const eliminarUsuario = async (id) => {
     return response.data;
 };
 
+// Tallas
+export const obtenerTallas = async () => {
+    const response = await api.get('/tallas');
+    return response.data;
+};
+
+export const obtenerTallasProducto = async (id_producto) => {
+    const response = await api.get(`/tallas/producto/${id_producto}`);
+    return response.data;
+};
+
+export const crearTalla = async (datos) => {
+    const response = await api.post('/tallas', datos);
+    return response.data;
+};
+
+export const agregarTallaProducto = async (datos) => {
+    const response = await api.post('/tallas/producto', datos);
+    return response.data;
+};
+
+export const actualizarStockTalla = async (id, stock) => {
+    const response = await api.put(`/tallas/producto/${id}`, { stock });
+    return response.data;
+};
+
+// Reportes
+export const obtenerDashboard = async () => {
+    const response = await api.get('/reportes/dashboard');
+    return response.data;
+};
+
+export const obtenerVentasPeriodo = async (dias = 30) => {
+    const response = await api.get(`/reportes/ventas-periodo?dias=${dias}`);
+    return response.data;
+};
+
+export const obtenerProductosMasVendidos = async (limite = 10) => {
+    const response = await api.get(`/reportes/productos-mas-vendidos?limite=${limite}`);
+    return response.data;
+};
+
+export const obtenerVentasPorCategoria = async () => {
+    const response = await api.get('/reportes/ventas-por-categoria');
+    return response.data;
+};
+
+export const obtenerVentasPorVendedor = async (dias = 30) => {
+    const response = await api.get(`/reportes/ventas-por-vendedor?dias=${dias}`);
+    return response.data;
+};
+
+export const obtenerProductosStockBajo = async () => {
+    const response = await api.get('/reportes/stock-bajo');
+    return response.data;
+};
+
+export const obtenerTallasMasVendidas = async () => {
+    const response = await api.get('/reportes/tallas-mas-vendidas');
+    return response.data;
+};
+
+export const obtenerVentasPorMes = async () => {
+    const response = await api.get('/reportes/ventas-por-mes');
+    return response.data;
+};
+
 export default api;

@@ -25,13 +25,20 @@ const NuevaVenta = () => {
     }
   };
 
-  const agregarAlCarrito = (producto) => {
-    const existe = carrito.find(item => item.id_producto === producto.id_producto);
+  const agregarAlCarrito = (producto, talla = null) => {
+    const key = talla ? `${producto.id_producto}-${talla.id_talla}` : producto.id_producto;
+    const existe = carrito.find(item => 
+      item.id_producto === producto.id_producto && 
+      (talla ? item.id_talla === talla.id_talla : !item.id_talla)
+    );
+    
+    const stockDisponible = talla ? talla.stock : producto.stock;
     
     if (existe) {
-      if (existe.cantidad < producto.stock) {
+      if (existe.cantidad < stockDisponible) {
         setCarrito(carrito.map(item =>
-          item.id_producto === producto.id_producto
+          (item.id_producto === producto.id_producto && 
+           (talla ? item.id_talla === talla.id_talla : !item.id_talla))
             ? { ...item, cantidad: item.cantidad + 1 }
             : item
         ));
@@ -41,33 +48,44 @@ const NuevaVenta = () => {
     } else {
       setCarrito([...carrito, {
         id_producto: producto.id_producto,
+        id_talla: talla ? talla.id_talla : null,
         nombre: producto.nombre,
+        talla_nombre: talla ? talla.nombre : 'Sin talla',
         precio_unitario: producto.precio,
         cantidad: 1,
-        stock: producto.stock
+        stock: stockDisponible
       }]);
     }
   };
 
-  const actualizarCantidad = (id, nuevaCantidad) => {
+  const actualizarCantidad = (id_producto, id_talla, nuevaCantidad) => {
     if (nuevaCantidad <= 0) {
-      eliminarDelCarrito(id);
+      eliminarDelCarrito(id_producto, id_talla);
       return;
     }
 
-    const producto = carrito.find(item => item.id_producto === id);
+    const producto = carrito.find(item => 
+      item.id_producto === id_producto && 
+      (id_talla ? item.id_talla === id_talla : !item.id_talla)
+    );
+    
     if (nuevaCantidad > producto.stock) {
       alert('No hay suficiente stock');
       return;
     }
 
     setCarrito(carrito.map(item =>
-      item.id_producto === id ? { ...item, cantidad: nuevaCantidad } : item
+      (item.id_producto === id_producto && 
+       (id_talla ? item.id_talla === id_talla : !item.id_talla))
+        ? { ...item, cantidad: nuevaCantidad } : item
     ));
   };
 
-  const eliminarDelCarrito = (id) => {
-    setCarrito(carrito.filter(item => item.id_producto !== id));
+  const eliminarDelCarrito = (id_producto, id_talla = null) => {
+    setCarrito(carrito.filter(item => 
+      !(item.id_producto === id_producto && 
+        (id_talla ? item.id_talla === id_talla : !item.id_talla))
+    ));
   };
 
   const calcularTotal = () => {
@@ -86,6 +104,7 @@ const NuevaVenta = () => {
       await crearVenta({
         productos: carrito.map(item => ({
           id_producto: item.id_producto,
+          id_talla: item.id_talla,
           cantidad: item.cantidad,
           precio_unitario: item.precio_unitario
         }))
@@ -128,13 +147,40 @@ const NuevaVenta = () => {
                   <p>{producto.categoria} - {producto.color}</p>
                   <span className="precio">${parseFloat(producto.precio).toLocaleString()}</span>
                   <span className="stock-badge">Stock: {producto.stock}</span>
+                  {producto.tiene_stock_bajo && (
+                    <span className="stock-bajo-badge">⚠️ Stock bajo</span>
+                  )}
                 </div>
-                <button
-                  onClick={() => agregarAlCarrito(producto)}
-                  className="btn-agregar"
-                >
-                  + Agregar
-                </button>
+                <div className="producto-acciones">
+                  {producto.tallas && producto.tallas.length > 0 ? (
+                    <div className="tallas-container">
+                      <p className="tallas-label">Seleccionar talla:</p>
+                      <div className="tallas-grid">
+                        {producto.tallas.map(talla => (
+                          <button
+                            key={talla.id_talla}
+                            onClick={() => agregarAlCarrito(producto, talla)}
+                            disabled={talla.stock === 0}
+                            className={`btn-talla ${talla.stock === 0 ? 'sin-stock' : ''}`}
+                            title={`Stock: ${talla.stock}`}
+                          >
+                            {talla.nombre}
+                            {talla.stock <= 3 && talla.stock > 0 && (
+                              <span className="talla-stock-bajo">!</span>
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => agregarAlCarrito(producto)}
+                      className="btn-agregar"
+                    >
+                      + Agregar
+                    </button>
+                  )}
+                </div>
               </div>
             ))}
           </div>
@@ -148,10 +194,11 @@ const NuevaVenta = () => {
           ) : (
             <>
               <div className="carrito-items">
-                {carrito.map(item => (
-                  <div key={item.id_producto} className="carrito-item">
+                {carrito.map((item, index) => (
+                  <div key={`${item.id_producto}-${item.id_talla || 'no-talla'}-${index}`} className="carrito-item">
                     <div className="item-info">
                       <h4>{item.nombre}</h4>
+                      {item.id_talla && <span className="item-talla">Talla: {item.talla_nombre}</span>}
                       <p>${parseFloat(item.precio_unitario).toLocaleString()} c/u</p>
                     </div>
                     <div className="item-controls">
@@ -160,10 +207,10 @@ const NuevaVenta = () => {
                         min="1"
                         max={item.stock}
                         value={item.cantidad}
-                        onChange={(e) => actualizarCantidad(item.id_producto, parseInt(e.target.value))}
+                        onChange={(e) => actualizarCantidad(item.id_producto, item.id_talla, parseInt(e.target.value))}
                       />
                       <button
-                        onClick={() => eliminarDelCarrito(item.id_producto)}
+                        onClick={() => eliminarDelCarrito(item.id_producto, item.id_talla)}
                         className="btn-eliminar"
                       >
                         ×

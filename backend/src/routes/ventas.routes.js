@@ -36,9 +36,10 @@ router.get('/:id', verificarToken, async (req, res) => {
 
     // Obtener detalles de la venta
     const [detalles] = await db.query(`
-      SELECT dv.*, p.nombre as nombre_producto, p.categoria, p.color
+      SELECT dv.*, p.nombre as nombre_producto, p.categoria, p.color, t.nombre as talla
       FROM detalle_venta dv
       INNER JOIN producto p ON dv.id_producto = p.id_producto
+      LEFT JOIN talla t ON dv.id_talla = t.id_talla
       WHERE dv.id_venta = ?
     `, [req.params.id]);
 
@@ -59,7 +60,7 @@ router.post('/', verificarToken, async (req, res) => {
   try {
     await connection.beginTransaction();
 
-    const { productos } = req.body; // Array de { id_producto, cantidad, precio_unitario }
+    const { productos } = req.body; // Array de { id_producto, id_talla, cantidad, precio_unitario }
 
     if (!productos || productos.length === 0) {
       return res.status(400).json({ error: 'Debe incluir al menos un producto' });
@@ -78,7 +79,7 @@ router.post('/', verificarToken, async (req, res) => {
 
     // Insertar detalles de venta y actualizar stock
     for (const item of productos) {
-      // Verificar stock
+      // Verificar stock general del producto
       const [producto] = await connection.query(
         'SELECT stock FROM producto WHERE id_producto = ?',
         [item.id_producto]
@@ -89,18 +90,43 @@ router.post('/', verificarToken, async (req, res) => {
         return res.status(404).json({ error: `Producto ${item.id_producto} no encontrado` });
       }
 
-      if (producto[0].stock < item.cantidad) {
-        await connection.rollback();
-        return res.status(400).json({ error: `Stock insuficiente para producto ${item.id_producto}` });
+      // Si hay talla, verificar y actualizar stock de la talla
+      if (item.id_talla) {
+        const [productoTalla] = await connection.query(
+          'SELECT stock FROM producto_talla WHERE id_producto = ? AND id_talla = ?',
+          [item.id_producto, item.id_talla]
+        );
+
+        if (productoTalla.length === 0) {
+          await connection.rollback();
+          return res.status(404).json({ error: `Talla no disponible para el producto ${item.id_producto}` });
+        }
+
+        if (productoTalla[0].stock < item.cantidad) {
+          await connection.rollback();
+          return res.status(400).json({ error: `Stock insuficiente para la talla seleccionada del producto ${item.id_producto}` });
+        }
+
+        // Actualizar stock de la talla
+        await connection.query(
+          'UPDATE producto_talla SET stock = stock - ? WHERE id_producto = ? AND id_talla = ?',
+          [item.cantidad, item.id_producto, item.id_talla]
+        );
+      } else {
+        // Sin talla, verificar stock general
+        if (producto[0].stock < item.cantidad) {
+          await connection.rollback();
+          return res.status(400).json({ error: `Stock insuficiente para producto ${item.id_producto}` });
+        }
       }
 
       // Insertar detalle de venta
       await connection.query(
-        'INSERT INTO detalle_venta (id_venta, id_producto, cantidad, precio_unitario) VALUES (?, ?, ?, ?)',
-        [id_venta, item.id_producto, item.cantidad, item.precio_unitario]
+        'INSERT INTO detalle_venta (id_venta, id_producto, id_talla, cantidad, precio_unitario) VALUES (?, ?, ?, ?, ?)',
+        [id_venta, item.id_producto, item.id_talla || null, item.cantidad, item.precio_unitario]
       );
 
-      // Actualizar stock
+      // Actualizar stock general del producto
       await connection.query(
         'UPDATE producto SET stock = stock - ? WHERE id_producto = ?',
         [item.cantidad, item.id_producto]

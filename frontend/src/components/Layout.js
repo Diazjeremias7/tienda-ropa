@@ -23,6 +23,7 @@ const Layout = () => {
           <Link to="/productos">Productos</Link>
           <Link to="/ventas">Ventas</Link>
           <Link to="/ventas/nueva">Nueva Venta</Link>
+          <Link to="/reportes">Reportes</Link>
           {usuario?.rol === 'admin' && (
             <Link to="/usuarios">Usuarios</Link>
           )}
