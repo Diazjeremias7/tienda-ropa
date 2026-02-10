@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { obtenerTallas, obtenerTallasProducto } from '../services/api';
 import './ProductoModal.css';
 
 const ProductoModal = ({ producto, onClose, onGuardar }) => {
@@ -7,22 +8,53 @@ const ProductoModal = ({ producto, onClose, onGuardar }) => {
     descripcion: '',
     precio: '',
     stock: '',
+    stock_minimo: 5,
     categoria: '',
     color: ''
   });
+  
+  const [tallas, setTallas] = useState([]);
+  const [tallasSeleccionadas, setTallasSeleccionadas] = useState({});
 
   useEffect(() => {
+    cargarTallas();
     if (producto) {
       setFormData({
         nombre: producto.nombre || '',
         descripcion: producto.descripcion || '',
         precio: producto.precio || '',
         stock: producto.stock || '',
+        stock_minimo: producto.stock_minimo || 5,
         categoria: producto.categoria || '',
         color: producto.color || ''
       });
+      if (producto.id_producto) {
+        cargarTallasProducto(producto.id_producto);
+      }
     }
   }, [producto]);
+
+  const cargarTallas = async () => {
+    try {
+      const response = await obtenerTallas();
+      setTallas(response);
+    } catch (error) {
+      console.error('Error al cargar tallas:', error);
+    }
+  };
+
+  const cargarTallasProducto = async (idProducto) => {
+    try {
+      const response = await obtenerTallasProducto(idProducto);
+      const tallasMap = {};
+      response.forEach(t => {
+        tallasMap[t.id_talla] = t.stock;
+      });
+      setTallasSeleccionadas(tallasMap);
+    } catch (error) {
+      console.error('Error al cargar tallas del producto:', error);
+    }
+  };
 
   const handleChange = (e) => {
     setFormData({
@@ -31,9 +63,26 @@ const ProductoModal = ({ producto, onClose, onGuardar }) => {
     });
   };
 
+  const handleTallaChange = (idTalla, stock) => {
+    setTallasSeleccionadas({
+      ...tallasSeleccionadas,
+      [idTalla]: parseInt(stock) || 0
+    });
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    onGuardar(formData);
+    
+    // Calcular el stock total sumando todas las tallas
+    const stockTotal = Object.values(tallasSeleccionadas).reduce((sum, stock) => sum + (parseInt(stock) || 0), 0);
+    
+    const dataToSend = {
+      ...formData,
+      stock: stockTotal,
+      tallas: tallasSeleccionadas
+    };
+    
+    onGuardar(dataToSend);
   };
 
   return (
@@ -81,14 +130,13 @@ const ProductoModal = ({ producto, onClose, onGuardar }) => {
             </div>
 
             <div className="form-group">
-              <label>Stock *</label>
+              <label>Stock Mínimo</label>
               <input
                 type="number"
-                name="stock"
-                value={formData.stock}
+                name="stock_minimo"
+                value={formData.stock_minimo}
                 onChange={handleChange}
                 min="0"
-                required
               />
             </div>
           </div>
@@ -121,6 +169,28 @@ const ProductoModal = ({ producto, onClose, onGuardar }) => {
                 placeholder="Ej: Negro, Blanco, Azul"
               />
             </div>
+          </div>
+
+          <div className="form-group tallas-section">
+            <label>Tallas y Stock por Talla</label>
+            <div className="tallas-grid">
+              {tallas.map(talla => (
+                <div key={talla.id_talla} className="talla-item">
+                  <label className="talla-label">{talla.nombre}</label>
+                  <input
+                    type="number"
+                    min="0"
+                    placeholder="0"
+                    value={tallasSeleccionadas[talla.id_talla] || ''}
+                    onChange={(e) => handleTallaChange(talla.id_talla, e.target.value)}
+                    className="talla-input"
+                  />
+                </div>
+              ))}
+            </div>
+            <small className="tallas-info">
+              Stock total: {Object.values(tallasSeleccionadas).reduce((sum, stock) => sum + (parseInt(stock) || 0), 0)} unidades
+            </small>
           </div>
 
           <div className="modal-actions">

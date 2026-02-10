@@ -61,10 +61,61 @@ function Productos() {
     }
   };
 
-  const handleGuardarProducto = () => {
-    cargarProductos();
-    setMostrarModal(false);
-    setProductoEditando(null);
+  const handleGuardarProducto = async (datosProducto) => {
+    try {
+      const { tallas, ...productoData } = datosProducto;
+      
+      if (productoEditando) {
+        // Actualizar producto existente
+        await api.put(`/productos/${productoEditando.id_producto}`, productoData);
+        
+        // Actualizar tallas si hay cambios
+        if (tallas && Object.keys(tallas).length > 0) {
+          for (const [idTalla, stock] of Object.entries(tallas)) {
+            if (stock > 0) {
+              try {
+                // Intentar actualizar primero
+                await api.put(`/tallas/producto/${productoEditando.id_producto}`, {
+                  id_talla: parseInt(idTalla),
+                  stock: parseInt(stock)
+                });
+              } catch (error) {
+                // Si no existe, crear
+                await api.post('/tallas/producto', {
+                  id_producto: productoEditando.id_producto,
+                  id_talla: parseInt(idTalla),
+                  stock: parseInt(stock)
+                });
+              }
+            }
+          }
+        }
+      } else {
+        // Crear nuevo producto
+        const response = await api.post('/productos', productoData);
+        const nuevoProductoId = response.data.id;
+        
+        // Agregar tallas al nuevo producto
+        if (tallas && Object.keys(tallas).length > 0) {
+          for (const [idTalla, stock] of Object.entries(tallas)) {
+            if (stock > 0) {
+              await api.post('/tallas/producto', {
+                id_producto: nuevoProductoId,
+                id_talla: parseInt(idTalla),
+                stock: parseInt(stock)
+              });
+            }
+          }
+        }
+      }
+      
+      cargarProductos();
+      setMostrarModal(false);
+      setProductoEditando(null);
+    } catch (error) {
+      console.error('Error al guardar producto:', error);
+      alert('Error al guardar el producto');
+    }
   };
 
   return (
